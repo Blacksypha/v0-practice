@@ -1,4 +1,8 @@
 "use client"
+import { NextResponse } from 'next/server'
+import { headers } from 'next/headers'
+
+import { stripe } from '@/lib/stripe'
 
 import type React from "react"
 
@@ -13,10 +17,35 @@ import { Lock, CreditCard } from "lucide-react"
 export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsProcessing(true)
-    // Placeholder for Stripe integration
+    try {
+      const headersList = await headers()
+      const origin = headersList.get('origin')
+  
+      // Create Checkout Sessions from body params.
+      const session = await stripe.checkout.sessions.create({
+        line_items: [
+          {
+            // Provide the exact Price ID (for example, price_1234) of the product you want to sell
+            price: 'price_1SrdGu2eZvKYlo2C3G9T6lXK',
+            quantity: 1,
+          },
+        ],
+        mode: 'subscription',
+        success_url: `${origin ?? ''}/success?session_id={CHECKOUT_SESSION_ID}`,
+      });
+      if (!session.url) {
+        throw new Error('Failed to create Stripe checkout session URL.');
+      }
+      return NextResponse.redirect(session.url, 303)
+    } catch (err) {
+      return NextResponse.json(
+        { error: (err as Error).message },
+        { status: (err as Error & { statusCode?: number }).statusCode || 500 }
+      )
+    }
     setTimeout(() => {
       alert("Stripe integration placeholder - Payment would be processed here!")
       setIsProcessing(false)
