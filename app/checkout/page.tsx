@@ -1,11 +1,5 @@
 "use client"
-import { NextResponse } from 'next/server'
-import { headers } from 'next/headers'
-
-import { stripe } from '@/lib/stripe'
-
 import type React from "react"
-
 import { useState } from "react"
 import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
@@ -21,35 +15,27 @@ export default function CheckoutPage() {
     e.preventDefault()
     setIsProcessing(true)
     try {
-      const headersList = await headers()
-      const origin = headersList.get('origin')
-  
-      // Create Checkout Sessions from body params.
-      const session = await stripe.checkout.sessions.create({
-        line_items: [
-          {
-            // Provide the exact Price ID (for example, price_1234) of the product you want to sell
-            price: 'price_1SrdGu2eZvKYlo2C3G9T6lXK',
-            quantity: 1,
-          },
-        ],
-        mode: 'subscription',
-        success_url: `${origin ?? ''}/success?session_id={CHECKOUT_SESSION_ID}`,
-      });
-      if (!session.url) {
-        throw new Error('Failed to create Stripe checkout session URL.');
+      // Call our server API route which creates the Checkout Session
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: 'nexpods-pro', quantity: 1 })
+      })
+
+      const data = await res.json()
+      if (data?.url) {
+        // Redirect the browser to the Stripe-hosted Checkout page
+        window.location.href = data.url
+        return
       }
-      return NextResponse.redirect(session.url, 303)
+
+      throw new Error(data?.error || 'Failed to create Checkout session')
     } catch (err) {
-      return NextResponse.json(
-        { error: (err as Error).message },
-        { status: (err as Error & { statusCode?: number }).statusCode || 500 }
-      )
-    }
-    setTimeout(() => {
-      alert("Stripe integration placeholder - Payment would be processed here!")
+      console.error(err)
+      alert((err as Error).message)
+    } finally {
       setIsProcessing(false)
-    }, 1500)
+    }
   }
 
   return (
