@@ -38,7 +38,7 @@ export default function LandingPage() {
             <div className="flex flex-col items-center justify-center p-6 border-r border-border text-center">
               <Zap className="w-6 h-6 mb-3 text-accent" />
               <h3 className="font-semibold mb-1">Fast Charging</h3>
-              <p className="text-xs text-muted-foreground">5 min = 2 hours</p>
+              <p className="text-xs text-muted-foreground">5 min = 1 hours</p>
             </div>
             <div className="flex flex-col items-center justify-center p-6 border-r border-border text-center">
               <Shield className="w-6 h-6 mb-3 text-accent" />
