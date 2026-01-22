@@ -1,0 +1,78 @@
+
+> my-v0-project@0.1.0 dev /Users/shadow/v0-practice
+> next dev
+
+▲ Next.js 16.1.4 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.4.125:3000
+- Environments: .env.local
+
+✓ Starting...
+⚠ Minimum recommended TypeScript version is v5.1.0, older versions can potentially be incompatible with Next.js. Detected: 5.0.2
+✓ Ready in 753ms
+Stripe session creation error: Error: Not a valid URL
+    at ignore-listed frames {
+  type: 'StripeInvalidRequestError',
+  raw: [Object],
+  rawType: 'invalid_request_error',
+  code: 'url_invalid',
+  doc_url: 'https://stripe.com/docs/error-codes/url-invalid',
+  param: 'success_url',
+  detail: undefined,
+  headers: [Object],
+  requestId: 'req_JpfkFCWpGSmBYC',
+  statusCode: 400,
+  userMessage: undefined,
+  charge: undefined,
+  decline_code: undefined,
+  payment_intent: undefined,
+  payment_method: undefined,
+  payment_method_type: undefined,
+  setup_intent: undefined,
+  source: undefined
+}
+ POST /api/checkout 500 in 879ms (compile: 527ms, render: 352ms)
+Stripe session creation error: Error: No such price: 'price_1SrdGu2eZvKYlo2C3G9T6lXK'
+    at ignore-listed frames {
+  type: 'StripeInvalidRequestError',
+  raw: [Object],
+  rawType: 'invalid_request_error',
+  code: 'resource_missing',
+  doc_url: 'https://stripe.com/docs/error-codes/resource-missing',
+  param: 'line_items[0][price]',
+  detail: undefined,
+  headers: [Object],
+  requestId: 'req_trDVcwaIN32jL4',
+  statusCode: 400,
+  userMessage: undefined,
+  charge: undefined,
+  decline_code: undefined,
+  payment_intent: undefined,
+  payment_method: undefined,
+  payment_method_type: undefined,
+  setup_intent: undefined,
+  source: undefined
+}
+ POST /api/checkout 500 in 411ms (compile: 97ms, render: 314ms)
+Stripe session creation error: Error: No such price: 'price_1SsIHf9ztXFb0sAoGpMYq4FL'
+    at ignore-listed frames {
+  type: 'StripeInvalidRequestError',
+  raw: [Object],
+  rawType: 'invalid_request_error',
+  code: 'resource_missing',
+  doc_url: 'https://stripe.com/docs/error-codes/resource-missing',
+  param: 'line_items[0][price]',
+  detail: undefined,
+  headers: [Object],
+  requestId: 'req_wZ3g91m1P7bwZB',
+  statusCode: 400,
+  userMessage: undefined,
+  charge: undefined,
+  decline_code: undefined,
+  payment_intent: undefined,
+  payment_method: undefined,
+  payment_method_type: undefined,
+  setup_intent: undefined,
+  source: undefined
+}
+ POST /api/checkout 500 in 555ms (compile: 126ms, render: 429ms)

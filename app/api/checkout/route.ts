@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
     // Server-side mapping of product -> price ID (do NOT accept price IDs from the client)
     const PRICE_MAP: Record<string, string> = {
-      'nexpods-pro': 'price_1SrdGu2eZvKYlo2C3G9T6lXK'
+      'nexpods-pro': 'price_1SsIHf9ztXFb0sAoGpMYq4FL'
       // add other productId -> price_id mappings here
     }
 
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid productId' }, { status: 400 })
     }
 
-    const origin = request.headers.get('origin') ?? process.env.NEXT_PUBLIC_APP_URL ?? ''
+    const origin = request.headers.get('origin') ?? process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
     const session = await stripe.checkout.sessions.create({
       line_items: [
@@ -35,8 +35,11 @@ export async function POST(request: Request) {
       ],
       // Use 'payment' for one-time, 'subscription' for recurring. Adjust as needed per product.
       mode: 'payment',
-      success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/checkout`
+      shipping_address_collection: {
+        allowed_countries: ['US', 'CA'], // Add countries you ship to
+      },
+      success_url: `${request.headers.get('origin')}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${request.headers.get('origin')}/checkout`,
     })
 
     return NextResponse.json({ url: session.url })

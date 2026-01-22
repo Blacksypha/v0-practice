@@ -1,18 +1,39 @@
-export default async function IndexPage({ searchParams }) {
-    const { canceled } = await searchParams
-  
-    if (canceled) {
-      console.log(
-        'Order canceled -- continue to shop around and checkout when you’re ready.'
-      )
+'use client'
+import { useState } from 'react'
+
+export default function IndexPage() {
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsProcessing(true)
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: 'nexpods-pro', quantity: 1 })
+      })
+      const data = await res.json()
+      if (data?.url) {
+        window.location.href = data.url
+        return
+      }
+      throw new Error(data?.error || 'Failed to create Checkout session')
+    } catch (err) {
+      console.error(err)
+      alert(err.message || 'Checkout failed')
+    } finally {
+      setIsProcessing(false)
     }
-    return (
-      <form action="/api/checkout" method="POST">
-        <section>
-          <button type="submit" role="link">
-            Checkout
-          </button>
-        </section>
-      </form>
-    )
   }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <section>
+        <button type="submit" role="link" disabled={isProcessing}>
+          {isProcessing ? 'Redirecting…' : 'Checkout'}
+        </button>
+      </section>
+    </form>
+  )
+}
