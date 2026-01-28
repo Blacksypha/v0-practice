@@ -7,23 +7,59 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Lock, CreditCard } from "lucide-react"
+import posthog from "posthog-js"
+
+const PRODUCT = {
+  id: 'nexpods-pro',
+  name: 'NexPods Pro',
+  price: 299,
+  quantity: 1
+}
 
 export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsProcessing(true)
+
+    // Get form data for potential user identification
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get('email') as string
+
+    // Capture checkout initiated event
+    posthog.capture('checkout_initiated', {
+      product_id: PRODUCT.id,
+      product_name: PRODUCT.name
+    })
+
+    // Get PostHog distinct ID and session ID for server-side correlation
+    const distinctId = posthog.get_distinct_id()
+    const sessionId = posthog.get_session_id()
+
     try {
       // Call our server API route which creates the Checkout Session
       const res = await fetch('/api/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId: 'nexpods-pro', quantity: 1 })
+        headers: {
+          'Content-Type': 'application/json',
+          'X-POSTHOG-DISTINCT-ID': distinctId || '',
+          'X-POSTHOG-SESSION-ID': sessionId || ''
+        },
+        body: JSON.stringify({
+          productId: PRODUCT.id,
+          quantity: PRODUCT.quantity,
+          email
+        })
       })
 
       const data = await res.json()
       if (data?.url) {
+        // Capture payment submission event
+        posthog.capture('payment_submitted', {
+          product_id: PRODUCT.id,
+          product_name: PRODUCT.name
+        })
         // Redirect the browser to the Stripe-hosted Checkout page
         window.location.href = data.url
         return
@@ -31,8 +67,20 @@ export default function CheckoutPage() {
 
       throw new Error(data?.error || 'Failed to create Checkout session')
     } catch (err) {
-      console.error(err)
-      alert((err as Error).message)
+      const error = err as Error
+      console.error(error)
+
+      // Capture checkout error event
+      posthog.capture('checkout_error', {
+        product_id: PRODUCT.id,
+        error_message: error.message,
+        error_type: 'checkout_session_creation_failed'
+      })
+
+      // Also capture the exception for error tracking
+      posthog.captureException(error)
+
+      alert(error.message)
     } finally {
       setIsProcessing(false)
     }
@@ -53,7 +101,7 @@ export default function CheckoutPage() {
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-4">
                 Contact Information
               </h2>
-              <Input type="email" placeholder="Email address" className="bg-secondary border-border" required />
+              <Input type="email" name="email" placeholder="Email address" className="bg-secondary border-border" required />
             </div>
 
             {/* Shipping */}

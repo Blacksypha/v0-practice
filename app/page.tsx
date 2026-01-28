@@ -1,10 +1,43 @@
+"use client"
+
+import { useEffect } from "react"
 import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { ArrowRight, Zap, Shield, Headphones, Mail } from "lucide-react"
+import posthog from "posthog-js"
 
 export default function LandingPage() {
+  // Track page view on landing page
+  useEffect(() => {
+    posthog.capture('page_view_landing', {
+      page_name: 'landing'
+    })
+  }, [])
+  const handleShopNowClick = () => {
+    posthog.capture('shop_now_clicked', {
+      location: 'hero_section',
+      destination: '/product'
+    })
+  }
+
+  const handleLearnMoreClick = () => {
+    posthog.capture('learn_more_clicked', {
+      location: 'hero_section'
+    })
+  }
+
+  const handleNewsletterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get('email') as string
+
+    posthog.capture('newsletter_subscribed', {
+      email_domain: email.split('@')[1] || 'unknown'
+    })
+  }
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <Header />
@@ -20,12 +53,12 @@ export default function LandingPage() {
             Experience revolutionary sound quality with our cutting-edge wireless earbuds. Engineered for perfection.
           </p>
           <div className="flex gap-4">
-            <Button asChild size="lg" className="gap-2">
+            <Button asChild size="lg" className="gap-2" onClick={handleShopNowClick}>
               <Link href="/product">
                 Shop Now <ArrowRight className="w-4 h-4" />
               </Link>
             </Button>
-            <Button variant="outline" size="lg">
+            <Button variant="outline" size="lg" onClick={handleLearnMoreClick}>
               Learn More
             </Button>
           </div>
@@ -62,8 +95,8 @@ export default function LandingPage() {
               <p className="text-sm text-muted-foreground mb-4">
                 Have questions? Subscribe for updates and exclusive offers.
               </p>
-              <form className="flex gap-3">
-                <Input type="email" placeholder="Enter your email" className="flex-1 bg-secondary border-border" />
+              <form className="flex gap-3" onSubmit={handleNewsletterSubmit}>
+                <Input type="email" name="email" placeholder="Enter your email" className="flex-1 bg-secondary border-border" required />
                 <Button type="submit">Subscribe</Button>
               </form>
               <p className="text-xs text-muted-foreground mt-3">

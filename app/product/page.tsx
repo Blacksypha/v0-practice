@@ -1,10 +1,49 @@
+"use client"
+
+import { useEffect } from "react"
 import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { Star, Check, Truck, RotateCcw } from "lucide-react"
+import posthog from "posthog-js"
+
+const PRODUCT = {
+  id: 'nexpods-pro',
+  name: 'NexPods Pro',
+  price: 299,
+  originalPrice: 349,
+  category: 'wireless-earbuds'
+}
 
 export default function ProductPage() {
+  // Track product view on page load (top of conversion funnel)
+  useEffect(() => {
+    posthog.capture('product_viewed', {
+      product_id: PRODUCT.id,
+      product_name: PRODUCT.name,
+      product_price: PRODUCT.price,
+      product_category: PRODUCT.category,
+      discount_amount: PRODUCT.originalPrice - PRODUCT.price
+    })
+  }, [])
+
+  const handleBuyNowClick = () => {
+    posthog.capture('clicked_product', {
+      product_id: PRODUCT.id,
+      product_name: PRODUCT.name
+    })
+  }
+
+  const handleAddToCartClick = () => {
+    posthog.capture('add_to_cart_clicked', {
+      product_id: PRODUCT.id,
+      product_name: PRODUCT.name,
+      product_price: PRODUCT.price,
+      quantity: 1
+    })
+  }
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <Header />
@@ -64,10 +103,10 @@ export default function ProductPage() {
           </div>
 
           <div className="flex gap-4 mb-8">
-            <Button asChild size="lg" className="flex-1">
-              <Link href="/preview">Buy Now</Link>
+            <Button asChild size="lg" className="flex-1" onClick={handleBuyNowClick}>
+              <Link href="/checkout">Buy Now</Link>
             </Button>
-            <Button variant="outline" size="lg" className="flex-1 bg-transparent">
+            <Button variant="outline" size="lg" className="flex-1 bg-transparent" onClick={handleAddToCartClick}>
               Add to Cart
             </Button>
           </div>
