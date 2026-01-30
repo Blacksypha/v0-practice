@@ -104,7 +104,7 @@ export default function ProductPage() {
 
           <div className="flex gap-4 mb-8">
             <Button asChild size="lg" className="flex-1" onClick={handleBuyNowClick}>
-              <Link href="/checkout">Buy Now</Link>
+              <Link href="/preview">Buy Now</Link>
             </Button>
             <Button variant="outline" size="lg" className="flex-1 bg-transparent" onClick={handleAddToCartClick}>
               Add to Cart

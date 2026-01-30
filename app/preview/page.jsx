@@ -9,6 +9,7 @@ import { Lock, CreditCard } from "lucide-react"
 
 export default function PreviewPage() {
   const [isProcessing, setIsProcessing] = useState(false)
+  const [discountCode, setDiscountCode] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -17,7 +18,11 @@ export default function PreviewPage() {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId: 'nexpods-pro', quantity: 1 })
+        body: JSON.stringify({ 
+          productId: 'nexpods-pro', 
+          quantity: 1,
+          discountCode: discountCode.toUpperCase() || undefined
+        })
       })
       const data = await res.json()
       if (data?.url) {
@@ -27,7 +32,7 @@ export default function PreviewPage() {
       throw new Error(data?.error || 'Failed to create Checkout session')
     } catch (err) {
       console.error(err)
-      alert((err.message).message || 'Checkout failed')
+      alert(err.message || 'Checkout failed')
     } finally {
       setIsProcessing(false)
     }
@@ -80,7 +85,24 @@ export default function PreviewPage() {
 
               <Separator className="my-6" />
 
-              <div className="flex justify-between text-lg font-semibold mb-6">
+              <div className="mb-6">
+                <Label htmlFor="discountCode" className="block text-sm font-medium mb-2">
+                  Discount Code (Optional)
+                </Label>
+                <Input
+                  id="discountCode"
+                  type="text"
+                  placeholder="Enter code"
+                  value={discountCode}
+                  onChange={(e) => setDiscountCode(e.target.value)}
+                  disabled={isProcessing}
+                  className="w-full px-3 py-2 border rounded-md bg-background text-foreground placeholder-muted-foreground disabled:opacity-50"
+                />
+              </div>
+
+              <Separator className="my-6" />
+
+              <div className="flex justify-between text-lg font-semibold">
                 <span>Total</span>
                 <span>$299.00</span>
               </div>
